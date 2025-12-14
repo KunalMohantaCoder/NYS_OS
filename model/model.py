@@ -138,6 +138,8 @@ class TransformerModel(nn.Module):
                 'num_decoder_layers': self.decoder.layers.__len__(),
                 'num_heads': self.encoder.layers[0].self_attn.num_heads,
                 'd_ff': self.encoder.layers[0].feed_forward.linear1.out_features,
+                'max_len': 512,  # Fixed max_len from training
+                'dropout': 0.1,
             }
         }, path)
     
@@ -154,7 +156,9 @@ class TransformerModel(nn.Module):
             num_encoder_layers=config['num_encoder_layers'],
             num_decoder_layers=config['num_decoder_layers'],
             num_heads=config['num_heads'],
-            d_ff=config['d_ff']
+            d_ff=config['d_ff'],
+            max_len=config.get('max_len', 512),  # Use saved max_len or default to 512
+            dropout=config.get('dropout', 0.1)
         )
         
         model.load_state_dict(checkpoint['model_state_dict'])

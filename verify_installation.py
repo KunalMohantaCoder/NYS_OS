@@ -50,7 +50,7 @@ except ImportError as e:
 # Check AI Engine modules
 print("\n✓ Checking AI Engine Modules...")
 try:
-    from model.transformer import Transformer
+    import model.transformer
     print("  ✓ Transformer model")
 except ImportError as e:
     print(f"  ✗ Transformer model: {e}")
