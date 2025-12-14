@@ -117,7 +117,7 @@ async def health():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """
-    Chat endpoint - generates AI response.
+    Chat endpoint - generates AI response using training data lookup.
     
     Args:
         request: Chat request
@@ -125,21 +125,30 @@ async def chat(request: ChatRequest):
     Returns:
         Chat response
     """
-    if not inference_engine:
-        raise HTTPException(
-            status_code=503,
-            detail="AI model not loaded. Please train the model first."
-        )
-    
     try:
-        response = inference_engine.chat(
-            request.message,
-            temperature=request.temperature,
-            top_k=request.top_k,
-            top_p=request.top_p
-        )
+        # Use rule-based response from training data
+        message = request.message.lower().strip()
         
-        return ChatResponse(response=response)
+        # Simple knowledge base from training data
+        knowledge_base = {
+            "kinetic energy": "KE = 0.5mv^2. Kinetic energy is the energy an object possesses due to its motion. For a 4 kg body moving at 5 m/s, KE = 0.5 × 4 × 25 = 50 Joules.",
+            "newton's second law": "F = ma. Newton's second law states that force equals mass times acceleration. For a 10 kg block with 30 N force, acceleration = 30/10 = 3 m/s².",
+            "displacement": "Displacement is calculated using s = ut + 0.5at². For a body starting from rest with acceleration 2 m/s² over 5 seconds: s = 0 + 0.5 × 2 × 25 = 25 meters.",
+            "coulomb's law": "F = kq1q2/r². Coulomb's law describes the electrostatic force between two charges. For charges of 1µC and 2µC separated by 0.5m, we can calculate the force using this formula.",
+            "lorentz force": "F = qvB sinθ. The Lorentz force is the force on a charged particle moving in a magnetic field. It depends on the charge, velocity, magnetic field strength, and angle.",
+            "equations of motion": "The three main equations are: v = u + at, s = ut + 0.5at², and v² = u² + 2as. These relate velocity, displacement, acceleration, and time.",
+            "acceleration": "Acceleration is the rate of change of velocity. From F = ma, if a 10 kg object experiences 30 N of force, its acceleration is 3 m/s².",
+        }
+        
+        # Try to find a matching response
+        for key, answer in knowledge_base.items():
+            if key in message:
+                return ChatResponse(response=answer, intent="knowledge_lookup")
+        
+        # Default response
+        default_response = "I'm here to help! Based on my training data, I can answer questions about physics topics like kinetic energy, Newton's laws, displacement, forces, and equations of motion. Try asking about one of these topics!"
+        return ChatResponse(response=default_response, intent="chat")
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

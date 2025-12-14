@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NyxOS AI Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .response {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .response.show {
+            display: block;
+        }
+        
+        .response h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .response pre {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9em;
+            border: 1px solid #ddd;
+        }
+        
+        .success {
+            color: #4CAF50;
+        }
+        
+        .error {
+            color: #f44336;
+        }
+        
+        .info-box {
+            background: #f0f7ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 0.95em;
+        }
+        
+        .quick-commands {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .quick-btn {
+            padding: 10px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 NyxOS AI Engine</h1>
+            <div class="status" id="status">Loading...</div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('assistant')">Assistant</button>
+            <button class="tab-btn" onclick="switchTab('chat')">Chat</button>
+            <button class="tab-btn" onclick="switchTab('health')">Health</button>
+        </div>
+        
+        <!-- Assistant Tab -->
+        <div id="assistant" class="tab-content active">
+            <div class="info-box">
+                💡 Create files, folders, manage events, and execute system commands
+            </div>
+            
+            <div class="input-group">
+                <label>Command</label>
+                <textarea id="assistant-input" placeholder="Examples:&#10;- create a file named notes.txt&#10;- create a folder named projects&#10;- add event tomorrow at 2pm&#10;- read the file notes.txt&#10;- list all files&#10;- delete notes.txt"></textarea>
+            </div>
+            
+            <button onclick="sendAssistant()">Send Command</button>
+            
+            <div class="quick-commands">
+                <button class="quick-btn" onclick="setAssistantInput('create a file named test.txt')">📄 Create File</button>
+                <button class="quick-btn" onclick="setAssistantInput('create a folder named my_folder')">📁 Create Folder</button>
+                <button class="quick-btn" onclick="setAssistantInput('list all files')">📋 List Files</button>
+                <button class="quick-btn" onclick="setAssistantInput('add event tomorrow at 2pm')">📅 Add Event</button>
+                <button class="quick-btn" onclick="setAssistantInput('show my schedule')">📆 Show Schedule</button>
+                <button class="quick-btn" onclick="setAssistantInput('what time is it')">⏰ Current Time</button>
+            </div>
+            
+            <div class="response" id="assistant-response">
+                <h3>Response:</h3>
+                <pre id="assistant-result"></pre>
+            </div>
+        </div>
+        
+        <!-- Chat Tab -->
+        <div id="chat" class="tab-content">
+            <div class="info-box">
+                💬 Ask questions about physics, mathematics, or general knowledge
+            </div>
+            
+            <div class="input-group">
+                <label>Message</label>
+                <textarea id="chat-input" placeholder="Ask a question...&#10;Examples:&#10;- What is Newton's second law?&#10;- Explain kinetic energy&#10;- How do you find displacement?"></textarea>
+            </div>
+            
+            <button onclick="sendChat()">Send Message</button>
+            
+            <div class="quick-commands">
+                <button class="quick-btn" onclick="setChatInput('What is Newton\'s second law?')">📚 Newton's Law</button>
+                <button class="quick-btn" onclick="setChatInput('Explain kinetic energy')">⚡ Kinetic Energy</button>
+                <button class="quick-btn" onclick="setChatInput('What is displacement?')">📍 Displacement</button>
+                <button class="quick-btn" onclick="setChatInput('Explain Coulomb\'s law')">⚛️ Coulomb's Law</button>
+                <button class="quick-btn" onclick="setChatInput('What is the Lorentz force?')">🔥 Lorentz Force</button>
+                <button class="quick-btn" onclick="setChatInput('How are equations of motion used?')">🎯 Equations</button>
+            </div>
+            
+            <div class="response" id="chat-response">
+                <h3>Response:</h3>
+                <pre id="chat-result"></pre>
+            </div>
+        </div>
+        
+        <!-- Health Tab -->
+        <div id="health" class="tab-content">
+            <div class="info-box">
+                🔍 Check the health status of the API server
+            </div>
+            
+            <button onclick="checkHealth()">Check Server Health</button>
+            
+            <div class="response" id="health-response">
+                <h3>Server Status:</h3>
+                <pre id="health-result"></pre>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:8000';
+        
+        // Initialize status on load
+        window.onload = () => {
+            checkHealth();
+        };
+        
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function setAssistantInput(text) {
+            document.getElementById('assistant-input').value = text;
+        }
+        
+        function setChatInput(text) {
+            document.getElementById('chat-input').value = text;
+        }
+        
+        async function sendAssistant() {
+            const message = document.getElementById('assistant-input').value.trim();
+            if (!message) {
+                alert('Please enter a command');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/assistant`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                showResponse('assistant', data);
+            } catch (error) {
+                showError('assistant', error.message);
+            }
+        }
+        
+        async function sendChat() {
+            const message = document.getElementById('chat-input').value.trim();
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                showResponse('chat', data);
+            } catch (error) {
+                showError('chat', error.message);
+            }
+        }
+        
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                
+                // Update status badge
+                const statusEl = document.getElementById('status');
+                if (data.status === 'healthy') {
+                    statusEl.innerHTML = '✅ Online - Model Loaded: ' + (data.model_loaded ? 'Yes' : 'No');
+                    statusEl.style.background = '#4CAF50';
+                } else {
+                    statusEl.innerHTML = '⚠️ Warning';
+                    statusEl.style.background = '#FF9800';
+                }
+                
+                showResponse('health', data);
+            } catch (error) {
+                const statusEl = document.getElementById('status');
+                statusEl.innerHTML = '❌ Offline';
+                statusEl.style.background = '#f44336';
+                showError('health', 'Cannot connect to server: ' + error.message);
+            }
+        }
+        
+        function showResponse(tab, data) {
+            const responseEl = document.getElementById(`${tab}-response`);
+            const resultEl = document.getElementById(`${tab}-result`);
+            resultEl.textContent = JSON.stringify(data, null, 2);
+            responseEl.classList.add('show');
+        }
+        
+        function showError(tab, error) {
+            const responseEl = document.getElementById(`${tab}-response`);
+            const resultEl = document.getElementById(`${tab}-result`);
+            resultEl.textContent = '❌ Error: ' + error;
+            resultEl.className = 'error';
+            responseEl.classList.add('show');
+        }
+    </script>
+</body>
+</html>
