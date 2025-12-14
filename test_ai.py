@@ -27,7 +27,7 @@ def test_health():
     """Test health endpoint."""
     print("Testing health endpoint...")
     try:
-    ``        if USE_REQUESTS:
+        if USE_REQUESTS:
             response = requests.get(f"{API_BASE}/health")
             print(f"  Status: {response.status_code}")
             print(f"  Response: {response.json()}")
