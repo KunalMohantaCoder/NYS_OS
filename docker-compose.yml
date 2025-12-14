@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  ai-engine:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - USE_GPU=false
+      - AI_MODEL_PATH=/app/data/models/best_model.pt
+      - AI_TOKENIZER_PATH=/app/data/models/tokenizer.json
+      - ASSISTANT_DATA_DIR=/app/data/assistant
+    volumes:
+      - ./data/models:/app/data/models
+      - ./data/assistant:/app/data/assistant
+      - ./data/training:/app/data/training
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

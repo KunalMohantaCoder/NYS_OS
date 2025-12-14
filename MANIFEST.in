@@ -1,0 +1,23 @@
+include README.md
+include DEPLOYMENT.md
+include GITHUB_DEPLOYMENT.md
+include CONTRIBUTING.md
+include LICENSE
+include .gitignore
+
+recursive-include model *.py
+recursive-include training *.py
+recursive-include inference *.py
+recursive-include assistant *.py
+recursive-include api *.py
+
+recursive-exclude * __pycache__
+recursive-exclude * *.pyc
+recursive-exclude * .pytest_cache
+recursive-exclude * .venv
+
+exclude data/models
+exclude data/training/*
+exclude venv
+exclude .git
+exclude .github
